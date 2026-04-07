@@ -4,7 +4,7 @@ module "vpc" {
   name               = "${var.name}-dev"
   cidr               = var.vpc_cidr
   availability_zones = var.availability_zones
-  single_nat_gateway = true   # cost-optimised for dev
+  single_nat_gateway = true # cost-optimised for dev
 }
 
 module "alb" {
@@ -34,13 +34,13 @@ module "ecs" {
   desired_count   = 1
   min_capacity    = 1
   max_capacity    = 2
-  use_spot        = true   # cheaper for dev
+  use_spot        = true # cheaper for dev
 
   environment = {
-    APP_ENV          = "development"
-    LOG_LEVEL        = "DEBUG"
-    SERVICE_NAME     = var.name
-    SERVICE_VERSION  = "1.0.1"
+    APP_ENV         = "development"
+    LOG_LEVEL       = "DEBUG"
+    SERVICE_NAME    = var.name
+    SERVICE_VERSION = "1.0.1"
   }
 
   aws_region         = var.aws_region

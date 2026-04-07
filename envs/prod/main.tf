@@ -4,7 +4,7 @@ module "vpc" {
   name               = "${var.name}-prod"
   cidr               = var.vpc_cidr
   availability_zones = var.availability_zones
-  single_nat_gateway = false   # HA: one NAT per AZ
+  single_nat_gateway = false # HA: one NAT per AZ
 }
 
 module "alb" {
@@ -27,15 +27,15 @@ module "ecs" {
   alb_security_group_id = module.alb.security_group_id
   target_group_arn      = module.alb.target_group_arn
 
-  container_image = var.container_image
-  container_port  = 8000
-  task_cpu        = 512
-  task_memory     = 1024
-  desired_count   = 2
-  min_capacity    = 2
-  max_capacity    = 10
+  container_image    = var.container_image
+  container_port     = 8000
+  task_cpu           = 512
+  task_memory        = 1024
+  desired_count      = 2
+  min_capacity       = 2
+  max_capacity       = 10
   cpu_target_percent = 60
-  use_spot        = false   # on-demand for prod reliability
+  use_spot           = false # on-demand for prod reliability
 
   environment = {
     APP_ENV         = "production"

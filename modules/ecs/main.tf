@@ -161,7 +161,7 @@ resource "aws_ecs_service" "this" {
   deployment_maximum_percent         = 200
 
   lifecycle {
-    ignore_changes = [desired_count]   # managed by autoscaling
+    ignore_changes = [desired_count] # managed by autoscaling
   }
 
   tags = var.tags
