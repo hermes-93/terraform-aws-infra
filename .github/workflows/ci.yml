@@ -73,16 +73,18 @@ jobs:
 
       - name: Run tflint (modules)
         run: |
+          CONFIG="$(pwd)/.tflint.hcl"
           for dir in modules/vpc modules/alb modules/ecs; do
             echo "Linting $dir..."
-            tflint --chdir "$dir"
+            tflint --chdir "$dir" --config "$CONFIG"
           done
 
       - name: Run tflint (envs)
         run: |
+          CONFIG="$(pwd)/.tflint.hcl"
           for dir in envs/dev envs/prod; do
             echo "Linting $dir..."
-            tflint --chdir "$dir"
+            tflint --chdir "$dir" --config "$CONFIG"
           done
 
   # ── Security scan ─────────────────────────────────────────────────────────
