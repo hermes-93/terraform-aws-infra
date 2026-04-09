@@ -24,19 +24,9 @@ jobs:
       - name: Run tfsec
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          # Results go to Security tab; we don't fail CI on known demo trade-offs
           soft_fail: true
-          format: sarif
-          sarif_file: tfsec.sarif
 
-      - name: Upload tfsec SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: tfsec.sarif
-          category: tfsec
-
-  # ── Trivy: misconfiguration scanner ───────────────────────────────────────
+  # ── Trivy: misconfiguration scanner with SARIF upload ─────────────────────
   trivy:
     name: Trivy config scan
     runs-on: ubuntu-latest
@@ -50,7 +40,6 @@ jobs:
           scan-ref: .
           format: sarif
           output: trivy.sarif
-          # Upload findings to Security tab; don't block on demo trade-offs
           exit-code: "0"
           trivyignores: .trivyignore
 
