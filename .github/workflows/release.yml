@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Terraform formatting
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.x"
+
+      - name: terraform fmt check
+        run: terraform fmt -check -recursive
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${VERSION}$" | head -1)
+
+          {
+            echo "## What's changed"
+            echo ""
+            if [ -n "$PREV_TAG" ]; then
+              git log "${PREV_TAG}..HEAD" --oneline --no-merges \
+                | sed 's/^[a-f0-9]* /- /'
+            else
+              git log --oneline --no-merges | sed 's/^[a-f0-9]* /- /'
+            fi
+            echo ""
+            echo "## Resources deployed"
+            echo ""
+            echo "| Module | Key resources |"
+            echo "|--------|---------------|"
+            echo "| vpc | VPC, 2×public + 2×private subnets, IGW, NAT GW(s), route tables |"
+            echo "| alb | Application Load Balancer, target group, HTTP listener, security group |"
+            echo "| ecs | ECS cluster, Fargate service, task definition, IAM roles, CloudWatch logs, autoscaling |"
+          } > /tmp/release_notes.md
+
+          cat /tmp/release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "terraform-aws-infra ${{ steps.version.outputs.version }}"
+          body_path: /tmp/release_notes.md
+          draft: false
+          prerelease: false
