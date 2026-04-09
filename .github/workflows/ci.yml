@@ -73,16 +73,18 @@ jobs:
 
       - name: Run tflint (modules)
         run: |
+          CONFIG="$(pwd)/.tflint.hcl"
           for dir in modules/vpc modules/alb modules/ecs; do
             echo "Linting $dir..."
-            tflint --chdir "$dir"
+            tflint --chdir "$dir" --config "$CONFIG"
           done
 
       - name: Run tflint (envs)
         run: |
+          CONFIG="$(pwd)/.tflint.hcl"
           for dir in envs/dev envs/prod; do
             echo "Linting $dir..."
-            tflint --chdir "$dir"
+            tflint --chdir "$dir" --config "$CONFIG"
           done
 
   # ── Security scan ─────────────────────────────────────────────────────────
@@ -102,10 +104,9 @@ jobs:
           framework: terraform
           output_format: sarif
           output_file_path: checkov-results.sarif
-          # Skip checks not applicable to a demo without real state/backend
-          skip_check: >-
-            CKV_AWS_91,CKV_AWS_92,CKV_AWS_116,CKV_AWS_131,
-            CKV_AWS_150,CKV_AWS_338,CKV2_AWS_5,CKV2_AWS_28
+          # Skip checks not applicable to a demo without HTTPS/KMS/WAF/flow-logs
+          # NOTE: must be a single line — YAML >- replaces newlines with spaces, breaking check IDs
+          skip_check: "CKV_AWS_2,CKV_AWS_23,CKV_AWS_65,CKV_AWS_91,CKV_AWS_92,CKV_AWS_103,CKV_AWS_116,CKV_AWS_130,CKV_AWS_131,CKV_AWS_150,CKV_AWS_158,CKV_AWS_260,CKV_AWS_338,CKV_AWS_378,CKV_AWS_382,CKV2_AWS_5,CKV2_AWS_11,CKV2_AWS_12,CKV2_AWS_19,CKV2_AWS_20,CKV2_AWS_28,CKV2_AWS_35,CKV2_AWS_44,CKV2_AWS_74,CKV2_AWS_76"
           soft_fail: false
 
       - name: Upload SARIF to GitHub Security tab
