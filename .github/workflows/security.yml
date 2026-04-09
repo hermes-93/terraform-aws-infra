@@ -1,0 +1,62 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly scan every Monday at 07:00 UTC
+    - cron: "0 7 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ── tfsec: static analysis for misconfigurations ──────────────────────────
+  tfsec:
+    name: tfsec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          # Results go to Security tab; we don't fail CI on known demo trade-offs
+          soft_fail: true
+          format: sarif
+          sarif_file: tfsec.sarif
+
+      - name: Upload tfsec SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: tfsec.sarif
+          category: tfsec
+
+  # ── Trivy: misconfiguration scanner ───────────────────────────────────────
+  trivy:
+    name: Trivy config scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: .
+          format: sarif
+          output: trivy.sarif
+          # Upload findings to Security tab; don't block on demo trade-offs
+          exit-code: "0"
+          trivyignores: .trivyignore
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-config
