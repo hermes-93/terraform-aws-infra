@@ -1,0 +1,16 @@
+# ALB: HTTP-only listener (no TLS cert in this portfolio demo)
+AVD-AWS-0052
+AVD-AWS-0053
+AVD-AWS-0054
+
+# ALB: drop_invalid_header_fields not required for demo
+AVD-AWS-0130
+
+# CloudWatch log group: KMS encryption not required for demo logs
+AVD-AWS-0017
+
+# NAT gateway / public subnet intentional (ALB in public subnet)
+AVD-AWS-0164
+
+# ECS task: no Secrets Manager (env vars are non-sensitive)
+AVD-AWS-0036
